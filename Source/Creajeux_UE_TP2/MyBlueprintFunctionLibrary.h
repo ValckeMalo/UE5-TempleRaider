@@ -47,4 +47,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static FVector2D GetScreenPositionForObject(const APlayerController* playerController, const AActor* actor);
+
+	UFUNCTION(BlueprintCallable)
+	static void ApplyRadialForceToObjects(const UObject* worldContextObject, const FVector origin, const float radius, const float strenght, const bool impulse);
 };

@@ -100,3 +100,34 @@ FVector2D UMyBlueprintFunctionLibrary::GetScreenPositionForObject(const APlayerC
 	playerController->ProjectWorldLocationToScreen(actorLocation, actorLoactionOnScreen);
 	return actorLoactionOnScreen;
 }
+
+void UMyBlueprintFunctionLibrary::ApplyRadialForceToObjects(const UObject* worldContextObject, const FVector origin, const float radius, const float strength, const bool impulse)
+{
+	TArray<AActor*> hitActors;
+	TArray<FHitResult> HitResults;
+	bool hit = UKismetSystemLibrary::SphereTraceMulti(worldContextObject, origin, origin, radius, UEngineTypes::ConvertToTraceType(ECC_PhysicsBody), true, {}, EDrawDebugTrace::ForDuration, HitResults, true, FLinearColor::Red, FLinearColor::Green, 0.0f);
+
+	if (hit)
+	{
+		for (const FHitResult hitResult : HitResults)
+		{
+			AActor* HitActor = hitResult.GetActor();
+			if (HitActor)
+			{
+				UPrimitiveComponent* primitive = Cast<UPrimitiveComponent>(HitActor->GetRootComponent());
+				if (primitive && primitive->IsSimulatingPhysics())
+				{
+					FVector forceDirection = (HitActor->GetActorLocation() - origin).GetSafeNormal();
+					if (impulse)
+					{
+						primitive->AddImpulse(forceDirection * strength, NAME_None, true);
+					}
+					else
+					{
+						primitive->AddForce(forceDirection * strength, NAME_None, true);
+					}
+				}
+			}
+		}
+	}
+}
