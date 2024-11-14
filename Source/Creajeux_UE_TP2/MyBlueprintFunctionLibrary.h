@@ -46,5 +46,5 @@ public:
 	static AActor* FindClosestActorOfClass(const TSubclassOf<AActor> actorClass, const AActor* fromActor);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	static FVector GetScreenPositionForObject(const AActor* playerController, const AActor* actor);
+	static FVector2D GetScreenPositionForObject(const APlayerController* playerController, const AActor* actor);
 };

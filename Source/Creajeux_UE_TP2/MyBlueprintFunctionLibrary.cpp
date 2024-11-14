@@ -93,7 +93,10 @@ AActor* UMyBlueprintFunctionLibrary::FindClosestActorOfClass(const TSubclassOf<A
 	return closestActor;
 }
 
-FVector UMyBlueprintFunctionLibrary::GetScreenPositionForObject(const AActor* playerController, const AActor* actor)
+FVector2D UMyBlueprintFunctionLibrary::GetScreenPositionForObject(const APlayerController* playerController, const AActor* actor)
 {
-
+	FVector actorLocation = actor->GetActorLocation();
+	FVector2D actorLoactionOnScreen;
+	playerController->ProjectWorldLocationToScreen(actorLocation, actorLoactionOnScreen);
+	return actorLoactionOnScreen;
 }
