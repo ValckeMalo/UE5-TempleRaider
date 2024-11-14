@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "MyCharacter.h"
 #include "Camera/CameraComponent.h"
 
-#include "MyCharacter.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	this->CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
@@ -19,7 +19,7 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -36,8 +36,22 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
-void AMyCharacter::testfunc()
+void AMyCharacter::Interact()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Coucou"));
+	UE_LOG(LogTemp, Warning, TEXT("Interact"));
+}
 
+void AMyCharacter::Scroll(float Direction)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Scroll : %f"), Direction);
+}
+
+void AMyCharacter::Grab()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab"));
+}
+
+void AMyCharacter::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Release"));
 }
