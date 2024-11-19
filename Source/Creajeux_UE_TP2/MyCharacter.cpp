@@ -13,6 +13,8 @@ AMyCharacter::AMyCharacter()
 	this->CameraComponent->SetupAttachment(GetMesh());
 
 	this->HandleComponent = CreateDefaultSubobject< UPhysicsHandleComponent>(TEXT("HandleComponent"));
+
+	this->HoldDistance = this->sightLenght;
 }
 
 // Called when the game starts or when spawned
@@ -20,6 +22,7 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	this->HoldDistance = this->sightLenght;
 }
 
 // Called every frame
@@ -43,44 +46,66 @@ void AMyCharacter::Interact()
 
 void AMyCharacter::Scroll(float Direction)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Scroll : %f"), Direction);
+	if (isGrabing)
+	{
+		this->HoldDistance += Direction * scrollPower;
+		this->HoldDistance = FMath::Clamp(this->HoldDistance, 100.f, this->sightLenght);
+	}
 }
 
 void AMyCharacter::Grab()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grab"));
-
 	if (CanGrabActor(hitResult))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Grab COMPONENT"));
 		this->HandleComponent->GrabComponent(hitResult.GetComponent(), NAME_None, hitResult.Location, false);
-		UpdateHandleLocation();
+		isGrabing = true;
 	}
 }
 
 void AMyCharacter::Release()
 {
-	this->HandleComponent->ReleaseComponent();
+	if (isGrabing)
+	{
+		this->HandleComponent->ReleaseComponent();
+		isGrabing = false;
+		this->HoldDistance = this->sightLenght;
+	}
 }
 
 void AMyCharacter::CheckSight()
 {
-	GetWorld()->LineTraceSingleByChannel(this->hitResult, this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, ECollisionChannel::ECC_Visibility);
-	DrawDebugLine(GetWorld(), this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, FColor::Red);
+	if (!isGrabing)
+	{
+		GetWorld()->LineTraceSingleByChannel(this->hitResult, this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, ECollisionChannel::ECC_Visibility);
+	}
+
+	DrawDebugLine(GetWorld(), this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, FColor::Blue);
 }
 
 void AMyCharacter::UpdateHandleLocation()
 {
-	this->HandleComponent->SetTargetLocation(this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->HoldDistance);
-	DrawDebugSphere(GetWorld(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->HoldDistance, 10, 32, FColor::Blue);
+	FColor color = FColor::Red;
+	if (isGrabing)
+	{
+		color = FColor::Green;
+		this->HandleComponent->SetTargetLocation(this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->HoldDistance);
+	}
+
+	DrawDebugSphere(GetWorld(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->HoldDistance, 10, 32, color);
 }
 
 bool AMyCharacter::CanGrabActor(FHitResult Hit)
 {
+	if (isGrabing)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Already grab something"));
+		return false;
+	}
+
 	AActor* hitActor = Hit.GetActor();
 	if (!hitActor)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("NoActor"));
+		UE_LOG(LogTemp, Warning, TEXT("No Actor found"));
 		return false;
 	}
 	return true;
