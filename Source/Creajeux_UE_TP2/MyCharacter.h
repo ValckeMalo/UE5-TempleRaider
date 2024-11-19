@@ -1,10 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
+#include <PhysicsEngine/PhysicsHandleComponent.h>
 #include "MyCharacter.generated.h"
 
 UCLASS()
@@ -20,7 +19,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -30,9 +29,21 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComponent;
 
+	UPROPERTY(EditAnywhere)
+	float sightLenght = 5.f;
+
+	UPROPERTY(EditAnywhere)
+	float HoldDistance = 5.f;
+
+	UPROPERTY(EditAnywhere)
+	FHitResult hitResult;
+
+	UPROPERTY(VisibleAnywhere)
+	UPhysicsHandleComponent* HandleComponent;
+
 	UFUNCTION(BlueprintCallable)
 	void Interact();
-	
+
 	UFUNCTION(BlueprintCallable)
 	void Scroll(float Direction);
 
@@ -41,4 +52,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Release();
+
+	void CheckSight();
+	void UpdateHandleLocation();
+	bool CanGrabActor(FHitResult Hit);
 };

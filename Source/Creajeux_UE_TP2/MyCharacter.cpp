@@ -1,8 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "MyCharacter.h"
+#include <PhysicsEngine/PhysicsHandleComponent.h>
 #include "Camera/CameraComponent.h"
-
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -13,6 +11,8 @@ AMyCharacter::AMyCharacter()
 	this->CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	this->CameraComponent->bUsePawnControlRotation = true;
 	this->CameraComponent->SetupAttachment(GetMesh());
+
+	this->HandleComponent = CreateDefaultSubobject< UPhysicsHandleComponent>(TEXT("HandleComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -26,14 +26,14 @@ void AMyCharacter::BeginPlay()
 void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	CheckSight();
+	UpdateHandleLocation();
 }
 
 // Called to bind functionality to input
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void AMyCharacter::Interact()
@@ -49,9 +49,39 @@ void AMyCharacter::Scroll(float Direction)
 void AMyCharacter::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab"));
+
+	if (CanGrabActor(hitResult))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Grab COMPONENT"));
+		this->HandleComponent->GrabComponent(hitResult.GetComponent(), NAME_None, hitResult.Location, false);
+		UpdateHandleLocation();
+	}
 }
 
 void AMyCharacter::Release()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Release"));
+	this->HandleComponent->ReleaseComponent();
+}
+
+void AMyCharacter::CheckSight()
+{
+	GetWorld()->LineTraceSingleByChannel(this->hitResult, this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, ECollisionChannel::ECC_Visibility);
+	DrawDebugLine(GetWorld(), this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, FColor::Red);
+}
+
+void AMyCharacter::UpdateHandleLocation()
+{
+	this->HandleComponent->SetTargetLocation(this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->HoldDistance);
+	DrawDebugSphere(GetWorld(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->HoldDistance, 10, 32, FColor::Blue);
+}
+
+bool AMyCharacter::CanGrabActor(FHitResult Hit)
+{
+	AActor* hitActor = Hit.GetActor();
+	if (!hitActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NoActor"));
+		return false;
+	}
+	return true;
 }
