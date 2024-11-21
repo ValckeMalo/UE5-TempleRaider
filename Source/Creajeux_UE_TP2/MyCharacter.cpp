@@ -2,11 +2,10 @@
 #include <PhysicsEngine/PhysicsHandleComponent.h>
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
+#include "Grabbable.h"
 
-// Sets default values
 AMyCharacter::AMyCharacter()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	this->CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
@@ -18,7 +17,6 @@ AMyCharacter::AMyCharacter()
 	this->HoldDistance = this->sightLenght;
 }
 
-// Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -26,7 +24,6 @@ void AMyCharacter::BeginPlay()
 	this->HoldDistance = this->sightLenght;
 }
 
-// Called every frame
 void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -34,7 +31,6 @@ void AMyCharacter::Tick(float DeltaTime)
 	UpdateHandleLocation();
 }
 
-// Called to bind functionality to input
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -45,7 +41,6 @@ void AMyCharacter::Interact()
 	if (IsImplementingInteractInterface(this->hitResult.GetActor()))
 	{
 		Cast<IInteractInterface>(this->ActorInSight)->Execute_PressButton(this->ActorInSight);
-		UE_LOG(LogTemp, Warning, TEXT("Interact"));
 	}
 }
 
@@ -62,8 +57,9 @@ void AMyCharacter::Grab()
 {
 	if (CanGrabActor(hitResult))
 	{
-		Cast<IInteractInterface>(hitResult.GetActor())->Execute_StopLookAt(hitResult.GetActor());
-		this->HandleComponent->GrabComponent(hitResult.GetComponent(), NAME_None, hitResult.Location, false);
+		this->GrabActor = hitResult.GetActor();
+		Cast<IGrabbable>(this->GrabActor)->Execute_Grab(this->GrabActor);
+		this->HandleComponent->GrabComponentAtLocation(hitResult.GetComponent(), NAME_None, hitResult.Location);
 		this->isGrabing = true;
 	}
 }
@@ -75,6 +71,7 @@ void AMyCharacter::Release()
 		this->HandleComponent->ReleaseComponent();
 		this->isGrabing = false;
 		this->HoldDistance = this->sightLenght;
+		ResetGrabActor();
 	}
 }
 
@@ -93,12 +90,36 @@ bool AMyCharacter::IsImplementingInteractInterface(AActor* Actor)
 	return false;
 }
 
+bool AMyCharacter::IsImplementingIGrabbable(AActor* Actor)
+{
+	if (!Actor)
+	{
+		return false;
+	}
+
+	if (Actor->GetClass()->ImplementsInterface(UGrabbable::StaticClass()))
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void AMyCharacter::ResetActorInSight()
 {
 	if (this->ActorInSight)
 	{
 		Cast<IInteractInterface>(this->ActorInSight)->Execute_StopLookAt(this->ActorInSight);
 		this->ActorInSight = nullptr;
+	}
+}
+
+void AMyCharacter::ResetGrabActor()
+{
+	if (this->GrabActor)
+	{
+		Cast<IGrabbable>(this->GrabActor)->Execute_Release(this->GrabActor);
+		this->GrabActor = nullptr;
 	}
 }
 
@@ -123,36 +144,26 @@ void AMyCharacter::CheckSight()
 	{
 		ResetActorInSight();
 	}
-
-	DrawDebugLine(GetWorld(), this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, FColor::Blue);
 }
 
 void AMyCharacter::UpdateHandleLocation()
 {
-	FColor color = FColor::Red;
 	if (isGrabing)
 	{
-		color = FColor::Green;
 		this->HandleComponent->SetTargetLocation(this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->HoldDistance);
 	}
 
-	DrawDebugSphere(GetWorld(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->HoldDistance, 10, 32, color);
+	DrawDebugSphere(GetWorld(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->HoldDistance, 10, 32, isGrabing ? FColor::Green : FColor::Red);
 }
 
 bool AMyCharacter::CanGrabActor(FHitResult Hit)
 {
-	if (isGrabing)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Already grab something"));
-		return false;
-	}
-
 	AActor* hitActor = Hit.GetActor();
-	if (hitActor && IsImplementingInteractInterface(hitActor))
+	if (hitActor && IsImplementingIGrabbable(hitActor))
 	{
 		return true;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("No IInteractInterface found"));
+	UE_LOG(LogTemp, Warning, TEXT("No IGrabbable found"));
 	return false;
 }
