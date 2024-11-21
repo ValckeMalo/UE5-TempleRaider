@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Grabbable.h"
 #include "MyKey.generated.h"
 
 UCLASS()
-class CREAJEUX_UE_TP2_API AMyKey : public AActor
+class CREAJEUX_UE_TP2_API AMyKey : public AActor ,public IGrabbable
 {
 	GENERATED_BODY()
 	
