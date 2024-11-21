@@ -55,7 +55,7 @@ void AMyCharacter::Scroll(float Direction)
 
 void AMyCharacter::Grab()
 {
-	if (CanGrabActor(hitResult))
+	if (!this->isGrabing && CanGrabActor(hitResult))
 	{
 		this->GrabActor = hitResult.GetActor();
 		Cast<IGrabbable>(this->GrabActor)->Execute_Grab(this->GrabActor);
@@ -68,10 +68,11 @@ void AMyCharacter::Release()
 {
 	if (this->isGrabing)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("release"));
+		ResetGrabActor();
 		this->HandleComponent->ReleaseComponent();
 		this->isGrabing = false;
 		this->HoldDistance = this->sightLenght;
-		ResetGrabActor();
 	}
 }
 
@@ -125,7 +126,10 @@ void AMyCharacter::ResetGrabActor()
 
 void AMyCharacter::CheckSight()
 {
-	GetWorld()->LineTraceSingleByChannel(this->hitResult, this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, ECollisionChannel::ECC_Visibility);
+	if (!this->isGrabing)
+	{
+		GetWorld()->LineTraceSingleByChannel(this->hitResult, this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, ECollisionChannel::ECC_Visibility);
+	}
 
 	AActor* hitActor = this->hitResult.GetActor();
 	if (hitActor)
@@ -158,6 +162,8 @@ void AMyCharacter::UpdateHandleLocation()
 
 bool AMyCharacter::CanGrabActor(FHitResult Hit)
 {
+	UE_LOG(LogTemp, Warning, TEXT("can grab"));
+
 	AActor* hitActor = Hit.GetActor();
 	if (hitActor && IsImplementingIGrabbable(hitActor))
 	{
