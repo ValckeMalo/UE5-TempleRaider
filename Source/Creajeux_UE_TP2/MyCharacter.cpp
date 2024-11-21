@@ -1,6 +1,7 @@
 #include "MyCharacter.h"
 #include <PhysicsEngine/PhysicsHandleComponent.h>
 #include "Camera/CameraComponent.h"
+#include "InteractInterface.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -41,6 +42,15 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AMyCharacter::Interact()
 {
+	if (this->ActorInSight == nullptr)
+	{
+		return;
+	}
+
+	if (IsImplementingInteractInterface(this->ActorInSight))
+	{
+		Cast<IInteractInterface>(this->ActorInSight)->Execute_PressButton(this->ActorInSight);
+	}
 	UE_LOG(LogTemp, Warning, TEXT("Interact"));
 }
 
@@ -57,19 +67,37 @@ void AMyCharacter::Grab()
 {
 	if (CanGrabActor(hitResult))
 	{
+		Cast<IInteractInterface>(hitResult.GetActor())->Execute_StopLookAt(hitResult.GetActor());
 		this->HandleComponent->GrabComponent(hitResult.GetComponent(), NAME_None, hitResult.Location, false);
-		isGrabing = true;
+		this->isGrabing = true;
 	}
 }
 
 void AMyCharacter::Release()
 {
-	if (isGrabing)
+	if (this->isGrabing)
 	{
 		this->HandleComponent->ReleaseComponent();
-		isGrabing = false;
+		this->isGrabing = false;
 		this->HoldDistance = this->sightLenght;
 	}
+}
+
+bool AMyCharacter::IsImplementingInteractInterface(AActor* Actor)
+{
+	IInteractInterface* interface = Cast<IInteractInterface>(Actor);
+	if (interface)
+	{
+		this->ActorInSight = Actor;
+		return true;
+	}
+
+	return false;
+}
+
+void AMyCharacter::ResetActorInSight()
+{
+	this->ActorInSight = nullptr;
 }
 
 void AMyCharacter::CheckSight()
@@ -77,6 +105,16 @@ void AMyCharacter::CheckSight()
 	if (!isGrabing)
 	{
 		GetWorld()->LineTraceSingleByChannel(this->hitResult, this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, ECollisionChannel::ECC_Visibility);
+
+		AActor* hitActor = this->hitResult.GetActor();
+		if (hitActor)
+		{
+			IInteractInterface* interactInterface = Cast<IInteractInterface>(hitActor);
+			if (interactInterface)
+			{
+				interactInterface->Execute_LookAt(hitActor);
+			}
+		}
 	}
 
 	DrawDebugLine(GetWorld(), this->CameraComponent->GetComponentLocation(), this->CameraComponent->GetComponentLocation() + this->CameraComponent->GetForwardVector() * this->sightLenght, FColor::Blue);
@@ -103,10 +141,12 @@ bool AMyCharacter::CanGrabActor(FHitResult Hit)
 	}
 
 	AActor* hitActor = Hit.GetActor();
-	if (!hitActor)
+	IInteractInterface* interactInterface = Cast<IInteractInterface>(hitActor);
+	if (interactInterface)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No Actor found"));
-		return false;
+		return true;
 	}
-	return true;
+
+	UE_LOG(LogTemp, Warning, TEXT("No IInteractInterface found"));
+	return false;
 }

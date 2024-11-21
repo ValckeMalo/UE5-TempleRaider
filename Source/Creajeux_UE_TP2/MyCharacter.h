@@ -32,10 +32,13 @@ public:
 	UFUNCTION(BlueprintCallable) void Scroll(float Direction);
 	UFUNCTION(BlueprintCallable) void Grab();
 	UFUNCTION(BlueprintCallable) void Release();
+	UFUNCTION(BlueprintCallable) bool IsImplementingInteractInterface(AActor* Actor);
+	UFUNCTION(BlueprintCallable) void ResetActorInSight();
 
 private:
 	float HoldDistance;
 	bool isGrabing = false;
+	AActor* ActorInSight = nullptr;
 
 	void CheckSight();
 	void UpdateHandleLocation();
