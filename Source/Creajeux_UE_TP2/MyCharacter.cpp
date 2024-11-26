@@ -61,11 +61,6 @@ void AMyCharacter::Grab()
 	if (!this->isGrabing && CanGrabActor(hitResult))
 	{
 		this->GrabActor = hitResult.GetActor();
-		if (Cast<IGrabbable>(this->GrabActor))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Grab"));
-		}
-
 		Cast<IGrabbable>(this->GrabActor)->Execute_Grab(this->GrabActor);
 		this->HandleComponent->GrabComponentAtLocation(hitResult.GetComponent(), NAME_None, hitResult.Location);
 		this->isGrabing = true;
