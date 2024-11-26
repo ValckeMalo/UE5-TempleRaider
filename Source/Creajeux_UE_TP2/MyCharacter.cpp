@@ -71,7 +71,6 @@ void AMyCharacter::Release()
 {
 	if (this->isGrabing)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("release"));
 		ResetGrabActor();
 		this->HandleComponent->ReleaseComponent();
 		this->isGrabing = false;
