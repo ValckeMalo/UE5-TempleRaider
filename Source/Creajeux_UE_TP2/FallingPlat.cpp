@@ -41,11 +41,8 @@ void AFallingPlat::DelayedDestActor()
 
 void AFallingPlat::OnTriggerOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Destroy"));
-
 	if (FindStatus(sequenceIndex) && OtherActor->IsA(AMyCharacter::StaticClass()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Destroy"));
 		FTimerHandle PlaySequenceTimer;
 		GetWorldTimerManager().SetTimer(PlaySequenceTimer, this, &AFallingPlat::DelayedDestActor, 0.8f, false);
 	}

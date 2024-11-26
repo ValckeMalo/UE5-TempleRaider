@@ -44,13 +44,14 @@ void AFallingPlat_Manager::RefreshPreview()
 	TArray<AActor*> fallingsPlat;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFallingPlat::StaticClass(), fallingsPlat);
 
+	FlushPersistentDebugLines(GetWorld());
 	for (AActor* actorFound : fallingsPlat)
 	{
 		AFallingPlat* fallingPlat = Cast<AFallingPlat>(actorFound);
 		if (fallingPlat)
 		{
 			fallingPlat->sequenceIndex = this->sequenceIndex;
-			DrawDebugSphere(GetWorld(), fallingPlat->GetActorLocation(), 150, 16, fallingPlat->FindStatus(this->sequenceIndex) ? FColor::Red : FColor::Green,true);
+			DrawDebugSphere(GetWorld(), fallingPlat->GetActorLocation(), 150, 16, fallingPlat->FindStatus(this->sequenceIndex) ? FColor::Red : FColor::Green, true);
 		}
 	}
 }

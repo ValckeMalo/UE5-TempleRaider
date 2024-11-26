@@ -24,7 +24,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable) void RefreshPreview();
+	UFUNCTION(CallInEditor) void RefreshPreview();
 
 	UPROPERTY() USceneComponent* root;
 	UPROPERTY(VisibleAnywhere) UBillboardComponent* billboard = nullptr;
