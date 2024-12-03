@@ -164,8 +164,6 @@ void AMyCharacter::UpdateHandleLocation()
 
 bool AMyCharacter::CanGrabActor(FHitResult Hit)
 {
-	UE_LOG(LogTemp, Warning, TEXT("can grab"));
-
 	AActor* hitActor = Hit.GetActor();
 	if (hitActor && IsImplementingIGrabbable(hitActor))
 	{
