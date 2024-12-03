@@ -18,12 +18,25 @@ void ASimonButton::BeginPlay()
 	Super::BeginPlay();
 
 	pushBtnMaterial = btnPushMesh->CreateDynamicMaterialInstance(0);
+	pushBtnMaterial->SetVectorParameterValue("Color_Tint_R", this->color);
 	LightDown();
 }
 
 void ASimonButton::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ASimonButton::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	pushBtnMaterial = btnPushMesh->CreateAndSetMaterialInstanceDynamic(0);
+	if (pushBtnMaterial)
+	{
+		pushBtnMaterial->SetVectorParameterValue("Color_Tint_R", color);
+		pushBtnMaterial->SetScalarParameterValue("EmissiveStrength_Final", 0.f);
+	}
 }
 
 void ASimonButton::PressButton_Implementation()
@@ -37,19 +50,17 @@ void ASimonButton::PressButton_Implementation()
 
 void ASimonButton::LightUp()
 {
-	pushBtnMaterial->SetVectorParameterValue("Color_Tint_R", this->higlightColor);
+	pushBtnMaterial->SetScalarParameterValue("EmissiveStrength_Final", 10.f);
 }
 
 void ASimonButton::LightDown()
 {
-	pushBtnMaterial->SetVectorParameterValue("Color_Tint_R", this->normalColor);
+	pushBtnMaterial->SetScalarParameterValue("EmissiveStrength_Final", 0.f);
 }
 
 void ASimonButton::PressAnim()
 {
 	LightUp();
-
-	UE_LOG(LogTemp, Display, TEXT("Press Anim"));
 
 	FTimerHandle PlaySequenceTimer;
 	GetWorldTimerManager().SetTimer(PlaySequenceTimer, this, &ASimonButton::LightDown, 0.8f, false);

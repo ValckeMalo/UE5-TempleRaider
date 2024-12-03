@@ -24,6 +24,8 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	void OnConstruction(const FTransform& Transform) override;
+
 	void PressButton_Implementation() override;
 
 	void LightUp();
@@ -36,6 +38,5 @@ public:
 	UPROPERTY(VisibleAnywhere) UStaticMeshComponent* btnPushMesh = nullptr;
 
 	UPROPERTY(VisibleAnywhere) UMaterialInstanceDynamic* pushBtnMaterial = nullptr;
-	UPROPERTY(EditAnywhere) FColor normalColor;
-	UPROPERTY(EditAnywhere) FColor higlightColor;
+	UPROPERTY(EditAnywhere) FColor color;
 };
