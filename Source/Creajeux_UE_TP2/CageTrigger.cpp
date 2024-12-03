@@ -27,17 +27,13 @@ void ACageTrigger::Tick(float deltaTime)
 {
 	Super::Tick(deltaTime);
 
-	UE_LOG(LogTemp, Warning, TEXT("Tick"));
-
 	if (isLerping && MovingActorRef)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Interp"));
 
 		FVector CurrentLocation = MovingActorRef->GetActorLocation();
 		FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, deltaTime, lerpSpeed);
 		MovingActorRef->SetActorLocation(NewLocation);
 
-		UE_LOG(LogTemp, Warning, TEXT("Interp"));
 
 		if (FVector::Dist(NewLocation, TargetLocation) < UE_KINDA_SMALL_NUMBER)
 		{
@@ -48,12 +44,8 @@ void ACageTrigger::Tick(float deltaTime)
 
 void ACageTrigger::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Start"));
-
 	if (OtherActor && (OtherActor != this) && OtherActor->GetClass()->ImplementsInterface(UGrabbable::StaticClass()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OK"));
-
 		if (MovingActorRef)
 		{
 			TargetLocation = StartingLocation;
@@ -64,12 +56,8 @@ void ACageTrigger::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
 
 void ACageTrigger::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("End"));
-
 	if (OtherActor && (OtherActor != this) && OtherActor->GetClass()->ImplementsInterface(UGrabbable::StaticClass()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OK"));
-
 		TArray<AActor*> OverlappingActors;
 		GetOverlappingActors(OverlappingActors);
 		if (MovingActorRef && !IsOverlappingActor(this) && OverlappingActors.Num() == 0)
