@@ -23,15 +23,36 @@ void ADoor::Tick(float DeltaTime) {}
 void ADoor::OpenDoor()
 {
 	GetWorldTimerManager().ClearTimer(this->timerDoor);
-	GetWorldTimerManager().SetTimer(this->timerDoor, this, &ADoor::RotateDoors, 0.01f, true);
+
+	FTimerDelegate Delegate;
+	Delegate.BindUFunction(this, "RotateDoors", this->doorRightMesh->GetRelativeRotation(), this->doorLeftMesh->GetRelativeRotation(), FRotator(0.f, 90.f, 0.f), FRotator(0.f, -90.f, 0.f));
+	GetWorldTimerManager().SetTimer(this->timerDoor, Delegate, 0.01f, true);
+
+	this->isOpen = true;
 }
 
-void ADoor::RotateDoors()
+void ADoor::CloseDoor()
+{
+	GetWorldTimerManager().ClearTimer(this->timerDoor);
+
+	FTimerDelegate Delegate;
+	Delegate.BindUFunction(this, "RotateDoors", this->doorRightMesh->GetRelativeRotation(), this->doorLeftMesh->GetRelativeRotation(), FRotator::ZeroRotator, FRotator::ZeroRotator);
+	GetWorldTimerManager().SetTimer(this->timerDoor, Delegate, 0.01f, true);
+
+	this->isOpen = false;
+}
+
+bool ADoor::IsDoorOpen()
+{
+	return this->isOpen;
+}
+
+void ADoor::RotateDoors(FRotator startRight, FRotator startLeft, FRotator targetRight, FRotator targetLeft)
 {
 	this->timeElapsed += GetWorld()->GetDeltaSeconds();
 
-	this->doorRightMesh->SetRelativeRotation(FMath::Lerp(FRotator::ZeroRotator, FRotator(0.f, 90.f, 0.f), this->timeElapsed));
-	this->doorLeftMesh->SetRelativeRotation(FMath::Lerp(FRotator::ZeroRotator, FRotator(0.f, -90.f, 0.f), this->timeElapsed));
+	this->doorRightMesh->SetRelativeRotation(FMath::Lerp(startRight, targetRight, this->timeElapsed));
+	this->doorLeftMesh->SetRelativeRotation(FMath::Lerp(startLeft, targetLeft, this->timeElapsed));
 
 	if (timeElapsed >= duration)
 	{

@@ -17,16 +17,18 @@ public:
 protected:
 	virtual void BeginPlay() override;
 private:
-	void RotateDoors();
+	UFUNCTION() void RotateDoors(FRotator startRight, FRotator startLeft, FRotator targetRight, FRotator targetLeft);
 
 	float timeElapsed = 0.f;
 	float duration = 1.f;
 	FTimerHandle timerDoor;
-
+	bool isOpen = false;
 public:
 	virtual void Tick(float DeltaTime) override;
 
 	void OpenDoor();
+	void CloseDoor();
+	bool IsDoorOpen();
 
 	UPROPERTY(EditAnywhere) UStaticMeshComponent* frameMesh = nullptr;
 	UPROPERTY(EditAnywhere) UStaticMeshComponent* doorLeftMesh = nullptr;
