@@ -50,7 +50,7 @@ void ASimonButton::PressButton_Implementation()
 
 void ASimonButton::LightUp()
 {
-	pushBtnMaterial->SetScalarParameterValue("EmissiveStrength_Final", 10.f);
+	pushBtnMaterial->SetScalarParameterValue("EmissiveStrength_Final", 1.f);
 }
 
 void ASimonButton::LightDown()

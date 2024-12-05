@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Door.h"
 #include "Simon_Manager.generated.h"
 
 class ASimonButton;
@@ -37,6 +38,7 @@ public:
 	int GetSequence();
 	void Reset();
 
+	UPROPERTY(EditAnywhere) ADoor* door;
 	UPROPERTY(EditAnywhere) ASimonButton* resetButton = nullptr;
 	UPROPERTY(EditAnywhere) TArray<FSimonButtonSequence> Sequences;
 	int currentIndexSequence = 0;

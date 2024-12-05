@@ -49,8 +49,6 @@ void ASimon_Manager::ButtonPressed(ASimonButton* Button)
 	{
 		if (isReset)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlaySequence"));
-
 			isReset = false;
 			PlaySequence();
 		}
@@ -70,8 +68,6 @@ void ASimon_Manager::CheckSequence(ASimonButton* Button)
 {
 	if (Button == this->Sequences[this->currentIndexSequence].Buttons[this->indexInSequence])
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Good"));
-
 		this->indexInSequence++;
 
 		if (this->indexInSequence >= this->Sequences[this->currentIndexSequence].Buttons.Num())
@@ -82,24 +78,18 @@ void ASimon_Manager::CheckSequence(ASimonButton* Button)
 
 			if (this->currentIndexSequence >= this->Sequences.Num())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Win"));
-
 				Reset();
 				TriggerWinProcess();
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Next Sequence"));
-
 				FTimerHandle PlaySequenceTimer;
-				GetWorldTimerManager().SetTimer(PlaySequenceTimer, this, &ASimon_Manager::PlaySequence, 1.f , false);
+				GetWorldTimerManager().SetTimer(PlaySequenceTimer, this, &ASimon_Manager::PlaySequence, 1.f, false);
 			}
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("False"));
-
 		Reset();
 	}
 }
@@ -107,7 +97,10 @@ void ASimon_Manager::CheckSequence(ASimonButton* Button)
 void ASimon_Manager::TriggerWinProcess()
 {
 	isWin = true;
-	UE_LOG(LogTemp, Warning, TEXT("Win"));
+	if (door)
+	{
+		door->OpenDoor();
+	}
 }
 
 int ASimon_Manager::GetSequence()
