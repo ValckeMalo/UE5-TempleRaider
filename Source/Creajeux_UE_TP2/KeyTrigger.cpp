@@ -29,6 +29,7 @@ void AKeyTrigger::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
 	if (OtherActor->GetClass()->ImplementsInterface(UGrabbable::StaticClass()) && OtherActor->ActorHasTag(FName("Key")))
 	{
 		OtherActor->Tags.Remove("Key");
+		OtherActor->SetActorEnableCollision(false);
 		Cast<AMyCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->Release();
 		OtherActor->AttachToComponent(this->locks[this->indexLock], FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 
